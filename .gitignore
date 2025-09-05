@@ -1,0 +1,16 @@
+# === Build / IDE ===
+.bloop/
+.metals/
+project/target/
+target/
+project/project/
+
+# === Logs ===
+*.log
+
+# === MySQL runtime data ===
+mysql-data/
+
+# === OS / Editor junk ===
+.DS_Store
+Thumbs.db

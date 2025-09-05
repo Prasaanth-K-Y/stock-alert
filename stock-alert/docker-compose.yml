@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  mysql-stock:
+    image: mysql:8.0
+    container_name: mysql-stock
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 000000  # replace with secure password
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: stockuser
+      MYSQL_PASSWORD: stockpass
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - stock-net
+
+  stock-alert-service:
+    image: stock-alert-app:1.0
+    container_name: stock-alert-service
+    restart: on-failure
+    depends_on:
+      - mysql-stock
+    environment:
+      PLAY_SECRET: "replace-this-with-a-very-long-and-random-secret-key-!@#$" # e.g., openssl rand -base64 32
+      DB_URL: "jdbc:mysql://mysql-stock:3306/testdb"
+      DB_USER: "stockuser"
+      DB_PASSWORD: "stockpass"
+    ports:
+      - "9002:9000"
+    networks:
+      - stock-net
+
+volumes:
+  mysql-data:
+
+networks:
+  stock-net:
+    driver: bridge

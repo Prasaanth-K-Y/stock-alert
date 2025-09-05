@@ -1,0 +1,18 @@
+# --- !Ups
+CREATE TABLE items (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    stock BIGINT NOT NULL,
+    minStock BIGINT NOT NULL
+);
+
+CREATE TABLE orders (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    item BIGINT NOT NULL,
+    qty BIGINT NOT NULL,
+    CONSTRAINT fk_item FOREIGN KEY (item) REFERENCES items(id)
+);
+
+# --- !Downs
+DROP TABLE orders;
+DROP TABLE items;
