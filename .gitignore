@@ -5,6 +5,7 @@
 target/
 project/project/
 project/target/
+**/.bloop/
 
 
 stock-alert/mysql-data/
