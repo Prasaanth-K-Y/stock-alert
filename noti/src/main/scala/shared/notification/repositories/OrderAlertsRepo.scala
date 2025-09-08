@@ -13,10 +13,13 @@ class OrderAlertsTable(tag: Tag) extends Table[OrderAlert](tag, "order_alerts") 
 }
 
 class OrderAlertsRepo(db: Database)(implicit ec: ExecutionContext) {
-  private val alerts = TableQuery[OrderAlertsTable]
+  val alerts = TableQuery[OrderAlertsTable]
 
   def init(): Future[Unit] = db.run(alerts.schema.createIfNotExists)
 
   def insertAlert(orderId: String): Future[Long] =
     db.run((alerts returning alerts.map(_.id)) += OrderAlert(orderId = orderId))
+
+  def getAlertById(id: Long): Future[Option[OrderAlert]] =
+    db.run(alerts.filter(_.id === id).result.headOption)
 }

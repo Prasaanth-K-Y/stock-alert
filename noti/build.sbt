@@ -9,7 +9,8 @@ lazy val root = (project in file("."))
 
 libraryDependencies ++= Seq(
   guice,
-   "io.grpc" % "grpc-services" % "1.64.0",
+  "io.grpc" % "grpc-services" % "1.64.0",
+  "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.2" % Test,
   "com.typesafe.play" %% "play-slick" % "5.4.0",
   "grpc-app" %% "grpc-app" % "1.0-SNAPSHOT",
   "com.typesafe.play" %% "play-slick-evolutions" % "5.4.0",

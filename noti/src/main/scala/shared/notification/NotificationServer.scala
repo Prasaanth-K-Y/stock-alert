@@ -29,7 +29,7 @@ object NotificationServer {
       .build()
       .start()
 
-    println(s"🚀 Notification gRPC server running on port $port")
+    println(s" Notification gRPC server running on port $port")
 
     sys.addShutdownHook {
       println("Shutting down gRPC server...")
