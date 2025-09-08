@@ -1,7 +1,6 @@
-# Add a route for the HomeController to handle the root path
 GET     /                      controllers.HomeController.index
 
-# Your existing routes
+
 GET     /items                 controllers.StockController.getAllItems()
 GET     /items/:id             controllers.StockController.getItem(id: Long)
 POST    /items                 controllers.StockController.addItems()

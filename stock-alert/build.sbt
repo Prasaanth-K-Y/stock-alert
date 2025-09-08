@@ -1,4 +1,4 @@
-enablePlugins(PlayScala) // removed JavaAppPackaging
+enablePlugins(PlayScala)
 
 import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport._
 
@@ -10,6 +10,7 @@ libraryDependencies ++= Seq(
   guice,
   "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.2" % Test,
   "com.typesafe.play" %% "play-slick" % "5.4.0",
+  "org.mockito" %% "mockito-scala-scalatest" % "1.17.27" % Test,
   "com.typesafe.play" %% "play-slick-evolutions" % "5.4.0",
   "mysql" % "mysql-connector-java" % "8.0.33",
   "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % "0.11.14",

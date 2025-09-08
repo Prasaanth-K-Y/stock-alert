@@ -113,17 +113,6 @@ class RepoTest extends PlaySpec
     }
 
 
-
-
-        // "insert invalidArg" in{
-        //    val i =  Items(None,11, 21, 1)
-        //     val f = irepo.addItem(i)
-        //     intercept[IllegalArgumentException]{
-        //         Await.result(f,2.seconds)
-        //     }
-        // }
-
-
     }
  
     }
