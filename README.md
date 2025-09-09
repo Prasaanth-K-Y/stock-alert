@@ -1,5 +1,5 @@
 
-# 🏷 Stock Alert System (Microservices)
+# 🏷 Stock Alert System (Microservices)🛒
 
 A two-service system built in Scala:
 
@@ -173,8 +173,3 @@ Endpoints:
 4. Commit and push :-)
 
 ---
-
-
-
-````
-
