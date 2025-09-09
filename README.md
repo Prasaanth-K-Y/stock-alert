@@ -171,5 +171,3 @@ Endpoints:
 2. Create your feature branch
 3. Run tests locally
 4. Commit and push :-)
-
----
