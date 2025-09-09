@@ -12,4 +12,4 @@ ENV DB_PASSWORD=stockpass
 
 EXPOSE 9000
 
-CMD ./bin/stock-alert-app -Dplay.http.secret.key=$PLAY_SECRET -Dconfig.file=conf/application.conf -Dhttp.port=9000
+CMD ./bin/stock-alert-app -Dplay.http.secret.key=$PLAY_SECRET -Dconfig.file=conf/application.conf -Dhttp.port=9000 

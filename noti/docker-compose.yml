@@ -1,4 +1,7 @@
 services:
+# PORTS
+# mysql - 3309
+# stock - 9001
   mysql-noti:
     image: mysql:8.0
     container_name: mysql-noti
@@ -9,7 +12,7 @@ services:
       MYSQL_USER: notiuser
       MYSQL_PASSWORD: notipass
     ports:
-      - "3309:3306"   # connect from host via localhost:3309
+      - "3309:3306"   
     volumes:
       - mysql-noti-data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
@@ -40,7 +43,7 @@ services:
       DB_USER: notiuser
       DB_PASSWORD: notipass
     volumes:
-      - ./logs:/opt/docker/logs   # ensure logs are writable
+      - ./logs:/opt/docker/logs  
     networks:
       - noti-net
       - app-net   # shared network with stock service

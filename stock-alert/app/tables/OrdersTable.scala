@@ -8,5 +8,6 @@ class OrdersTable(tag: Tag)  extends Table[Orders](tag,"orders"){
     def item = column[Long]("item")
     def qty = column[Long]("qty")
 
+    // Relates MySQL table and Scala case class
     def * = (id.?,item, qty).mapTo[Orders]
 }
