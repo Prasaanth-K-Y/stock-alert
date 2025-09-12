@@ -2,8 +2,8 @@ package services
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import models.Orders
-import repositories.{ItemsRepo, OrdersRepo}
+import models.{Orders,Restock}
+import repositories.{ItemsRepo, OrdersRepo,RestockRepo}
 import shared.notification.{StringServiceGrpc, StringMessage}
 
 case class ShippingResult(orderId: Long, message: String)
@@ -19,6 +19,7 @@ case class ShippingResult(orderId: Long, message: String)
 class StockService @Inject()(
   itemsRepo: ItemsRepo,
   ordersRepo: OrdersRepo,
+  restockRepo:RestockRepo,
   grpcStub: StringServiceGrpc.StringServiceStub
 )(implicit ec: ExecutionContext) {
 
@@ -47,6 +48,16 @@ class StockService @Inject()(
           // 1. Log the low stock condition.
           println(s"[StockService] LOW STOCK for ${o.item}. Triggering gRPC alert...")
 
+          //Adding in the restock table 
+          val restockRow = Restock(None, o.item, o.customerId)
+
+          restockRepo.add(restockRow).map { id =>
+            println(s"[DEBUG] Restock row added with id: $id for customer ${o.customerId} and item ${o.item}")
+          }.recover {
+            case e: Exception =>
+              println(s"[DEBUG] Failed to add restock row: ${e.getMessage}")
+          }
+          // restockRepo.add(Restock(None, o.item, o.customerId))
           // 2. Prepare and send a gRPC alert to the external notification service.
           val request = StringMessage(
             s"LOW STOCK ALERT for item ${o.item}, attempted order for qty ${o.qty}"

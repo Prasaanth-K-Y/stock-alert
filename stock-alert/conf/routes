@@ -3,6 +3,15 @@ GET     /                      controllers.HomeController.index
 
 GET     /items                 controllers.StockController.getAllItems()
 GET     /items/:id             controllers.StockController.getItem(id: Long)
+PUT     /items/:id/:stock      controllers.StockController.updateStock(id: Long, stock:Long)
 POST    /items                 controllers.StockController.addItems()
 POST    /orders                controllers.StockController.newOrder()
 GET     /assets/*file          controllers.Assets.versioned(path="/public", file: Asset)
+
+
+POST    /customers              controllers.CustomerController.addCustomer()
+GET     /customers              controllers.CustomerController.getAll()
+GET     /customers/:id          controllers.CustomerController.getCustomer(id: Long)
+POST    /login                 controllers.CustomerController.login()
+PUT     /customers/:id/:phone   controllers.CustomerController.updatePhone(id: Long, phone: String)
+DELETE  /customers/:id          controllers.CustomerController.deleteCustomer(id: Long)

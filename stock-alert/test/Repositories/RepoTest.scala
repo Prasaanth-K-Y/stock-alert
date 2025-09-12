@@ -1,119 +1,90 @@
 package Repositories
 
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatestplus.play.PlaySpec
-import org.scalatestplus.play.guice._
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.must.Matchers
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import org.scalatest.BeforeAndAfterEach
+
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
-import scala.concurrent.{ExecutionContext, Future}
-import models.Items
+import slick.jdbc.MySQLProfile.api._
 import scala.concurrent.Await
-import org.scalatest.BeforeAndAfterEach
 import scala.concurrent.duration._
-import models.Orders
 
+import models.{Items, Customers, Orders}
+import repositories.{ItemsRepo, OrdersRepo, CustomersRepo}
 
-class RepoTest extends PlaySpec
-  with GuiceOneAppPerSuite
-  with ScalaFutures 
-  with BeforeAndAfterEach{
-    //=------------------ORDER
-    implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
-    lazy val irepo = app.injector.instanceOf[repositories.ItemsRepo]
-    lazy val orepo = app.injector.instanceOf[repositories.OrdersRepo]
-    
-    override def beforeEach(): Unit = {
-        Await.result(orepo.cleanTables, 2.seconds)
-        Await.result(irepo.cleanTables(), 2.seconds)
+class RepoTest
+  extends AnyWordSpec
+    with Matchers
+    with GuiceOneAppPerSuite
+    with BeforeAndAfterEach {
 
-        }
+  // Inject DB config
+  val dbConfig = app.injector.instanceOf[DatabaseConfigProvider]
+  val db = dbConfig.get[JdbcProfile].db
+  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-    //=------------------ORDER
-    "ItemsRepoTest" should {
-        "item insert in" in{
-            val i = Items(Some(1),"soap",21,1)
+  override protected def afterEach(): Unit = {
+    super.afterEach()
+    Await.result(
+      db.run(
+        DBIO.seq(
+          sqlu"DELETE FROM restock",
+          sqlu"DELETE FROM orders",
+          sqlu"DELETE FROM customers",
+          sqlu"DELETE FROM items"
+        )
+      ),
+      5.seconds
+    )
+  }
 
-           whenReady( irepo.addItem(i))
-           {res =>
-                res must be > 0L
+  val itemsRepo     = new ItemsRepo(dbConfig)
+  val ordersRepo    = new OrdersRepo(dbConfig)
+  val customersRepo = new CustomersRepo(dbConfig)
 
-           }
-
-        }
-        "item GET id" in {
-            val i =  Items(None,"soap", 21, 1)
-            whenReady(irepo.addItem(i)){res=>
-                res must be > 0L
-           
-            }
-        }
-        
-        "item insert no id" in {
-            val i =  Items(Some(3),"soap", 21, 1)
-            whenReady(irepo.addItem(i)){res=>
-                res must be > 0L
-
-            whenReady(irepo.getItem(res)){res1=>
-                res1 mustBe defined 
-                val ite = res1.get
-                ite.minStock mustBe i.minStock
-                ite.name mustBe i.name
-                ite.stock mustBe i.stock
-                }
-            }
-        }
-
-    //=------------------ITEMS
-    "OrderRepo" should {
-       "order insert in" in{
-            whenReady(irepo.addItem(Items(None,"soap",21,1))){it_id=>{
-            
-            val o = Orders(Some(1),it_id,21)
-
-           whenReady( orepo.newOrder(o)){res =>
-                res must be > 0L
-                
-           }
-            }
-            }
-
-        }
-        "order insert None" in {
-
-           whenReady(irepo.addItem(Items(None,"soap",33,3))){it_id=>{
-            
-                    val o = Orders(None,it_id,21)
-
-                whenReady( orepo.newOrder(o)){res =>
-                        res must be > 0L
-
-                }
-            }
-        }
+  "ItemsRepo" should {
+    "add and fetch an item" in {
+      val item = Items(None, "Pen", 10, 2)
+      val res = Await.result(itemsRepo.addItem(item), 5.seconds).fold(
+        err => fail(s"Failed to add item: $err"),
+        id => id
+      )
+      res must be > 0L
+      val fetched = Await.result(itemsRepo.getAllItems(), 5.seconds)
+      fetched.map(_.name) must contain("Pen")
     }
-        
-        "order Get id" in {
-            whenReady(irepo.addItem(Items(None,"soap",33,3))){it_id=>{
-            
-                    val o = Orders(Some(1),it_id,21)
+  }
 
-                whenReady( orepo.newOrder(o)){res =>
-                        res must be > 0L
-                        whenReady(orepo.getOrder(res)){ord=>
-                            ord mustBe defined
-                            val ord1= ord.get
-                            ord1.item mustBe o.item
-                            ord1.item mustBe o.item
-                        }
-
-                }
-            }
-        }
+  "CustomersRepo" should {
+    "add and fetch a customer" in {
+      val cust = Customers(None, "Alice", "alice@example.com", "secret", "1234567890", "email")
+      val res = Await.result(customersRepo.addCustomer(cust), 5.seconds).fold(
+        err => fail(s"Failed to add customer: $err"),
+        id => id
+      )
+      res must be > 0L
+      val fetched = Await.result(customersRepo.getAll(), 5.seconds)
+      fetched.map(_.name) must contain("Alice")
     }
+  }
 
-
+  "OrdersRepo" should {
+    "create and fetch an order" in {
+      val itemId: Long = Await.result(itemsRepo.addItem(Items(None, "Book", 5, 1)), 5.seconds).fold(
+        err => fail(s"Failed to add item: $err"),
+        id => id
+      )
+      val custId: Long = Await.result(customersRepo.addCustomer(Customers(None, "Bob", "bob@example.com", "secret", "9876543210", "sms")), 5.seconds).fold(
+        err => fail(s"Failed to add customer: $err"),
+        id => id
+      )
+      val order = Orders(None, itemId, 3, custId)
+      val res = Await.result(ordersRepo.newOrder(order), 5.seconds)
+      res must be > 0L
+      val fetched = Await.result(ordersRepo.getOrder(res), 5.seconds)
+      fetched.map(_.qty) must contain(3L)
     }
- 
-    }
+  }
 }

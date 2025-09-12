@@ -32,6 +32,12 @@ class ItemsRepo @Inject()(dbc: DatabaseConfigProvider)(implicit ec: ExecutionCon
       case None => db.run((It returning It.map(_.id)) += i).map(Right(_))
     }
   }
+
+  def updateStock(id: Long, qty: Long): Future[Int] = {
+    val q = for (i <- It if i.id === id) yield i.stock
+    db.run(q.update(qty))
+  }
+
   
   // Deletes all items from the table.
   def cleanTables(): Future[Int] = db.run(It.delete)
