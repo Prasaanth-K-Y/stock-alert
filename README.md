@@ -130,21 +130,11 @@ flowchart TD
 | DELETE | `/customers/:id`       | Delete a customer              | N/A                                                                                                                  |
 | POST   | `/customers/login`     | Customer login                 | `{ "name": "John", "password": "pass123" }`                                                                          |
 
-#### Restock
-
-| Method | Endpoint             | Description                              | Example Payload                    |
-| ------ | -------------------- | ---------------------------------------- | ---------------------------------- |
-| POST   | `/restocks`          | Add a restock request                    | `{ "itemId": 1, "customerId": 1 }` |
-| GET    | `/restocks`          | List all restock requests                | N/A                                |
-| GET    | `/restocks/item/:id` | Get restock requests for a specific item | N/A                                |
-
-> **Note:** Restock entries are automatically created by `StockService` when an order would reduce stock below `minStock`.
-
 ---
 
 ## Example Workflows
 
-### 1. Place Order Below Min Stock
+###  Place Order Below Min Stock
 
 1. POST `/orders` with:
 
@@ -169,7 +159,7 @@ flowchart TD
 
 ---
 
-### 2. Register Customer
+###  Register Customer
 
 POST `/customers`:
 
@@ -189,28 +179,6 @@ Response:
 {
   "id": 1,
   "message": "Customer John created"
-}
-```
-
----
-
-### 3. Add Manual Restock Request
-
-POST `/restocks`:
-
-```json
-{
-  "itemId": 1,
-  "customerId": 1
-}
-```
-
-Response:
-
-```json
-{
-  "id": 1,
-  "message": "Restock request added"
 }
 ```
 
