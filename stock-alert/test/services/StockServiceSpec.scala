@@ -9,7 +9,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.concurrent.ScalaFutures
 import models.{Items, Orders, Restock}
-import repositories.{ItemsRepo, OrdersRepo, RestockRepo}   // ✅ added RestockRepo
+import repositories.{ItemsRepo, OrdersRepo, RestockRepo}   
 import shared.notification.{StringServiceGrpc, StringMessage}
 
 class StockServiceSpec
@@ -20,10 +20,9 @@ class StockServiceSpec
 
   val mockItemsRepo   = mock[ItemsRepo]
   val mockOrdersRepo  = mock[OrdersRepo]
-  val mockRestockRepo = mock[RestockRepo]   // ✅ compiles now
+  val mockRestockRepo = mock[RestockRepo]   
   val mockGrpcStub    = mock[StringServiceGrpc.StringServiceStub]
 
-  // ✅ fixed constructor call (needs 4 args)
   val service = new StockService(mockItemsRepo, mockOrdersRepo, mockRestockRepo, mockGrpcStub)
 
   "StockService" should {
