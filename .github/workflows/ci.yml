@@ -10,13 +10,14 @@ jobs:
   build-all:
     name: Build All Projects
     runs-on: ubuntu-latest
-
     services:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: 000000
+          MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: testdb
+          MYSQL_USER: stockuser
+          MYSQL_PASSWORD: stockpass
         ports:
           - 3306:3306
         options: >-
@@ -48,30 +49,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-sbt-
 
-      # Step 0: Wait for MySQL to be ready
+      # Step 1: Wait for MySQL to be ready
       - name: Wait for MySQL
         run: |
-          echo "Waiting for MySQL..."
-          for i in {1..20}; do
-            if mysql -h 127.0.0.1 -P 3306 -u root -p000000 -e "SELECT 1" >/dev/null 2>&1; then
-              echo "MySQL is ready!"
-              break
-            fi
-            echo "MySQL not ready yet... sleeping 3s"
-            sleep 3
+          echo "Waiting for MySQL to be ready..."
+          for i in {1..30}; do
+            mysql -h 127.0.0.1 -u stockuser -pstockpass -e "SELECT 1" && break
+            echo "Waiting 2 seconds..."
+            sleep 2
           done
 
-      # Step 1: Build and publish grpc-app locally
+      # Step 2: Build and publish grpc-app locally
       - name: Build grpc-app
         working-directory: ./grpc/hello-world
         run: sbt clean compile publishLocal
 
-      # Step 2: Build and test stock-alert
+      # Step 3: Build & Test Stock Alert
       - name: Build & Test Stock Alert
         working-directory: ./stock-alert
         run: sbt clean compile test
 
-      # Step 3: Build and test notification service
+      # Step 4: Build & Test Notification Service
       - name: Build & Test Notification Service
         working-directory: ./noti
         run: sbt clean compile test
