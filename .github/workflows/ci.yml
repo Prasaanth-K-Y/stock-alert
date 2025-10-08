@@ -8,8 +8,9 @@ on:
 
 jobs:
   build-all:
-    name: Build & Test All
+    name: Build All Projects
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -21,8 +22,6 @@ jobs:
 
       - name: Set up sbt
         uses: sbt/setup-sbt@v1
-        with:
-          java-version: '21'
 
       - name: Cache sbt dependencies
         uses: actions/cache@v4
@@ -35,17 +34,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-sbt-
 
-      # 1️⃣ Build GRPC first
-      - name: Build & publish grpc locally
+      # Step 1: Build and publish grpc-app locally
+      - name: Build grpc-app
         working-directory: ./grpc/hello-world
         run: sbt clean compile publishLocal
 
-      # 2️⃣ Build Stock Alert
-      - name: Build & test stock-alert
+      # Step 2: Build and test stock-alert
+      - name: Build & Test Stock Alert
         working-directory: ./stock-alert
         run: sbt clean compile test
 
-      # 3️⃣ Build Notification Service
-      - name: Build & test noti
+      # Step 3: Build and test notification service
+      - name: Build & Test Notification Service
         working-directory: ./noti
         run: sbt clean compile test
