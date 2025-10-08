@@ -1,51 +1,29 @@
-name: CI Pipeline
-
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
 jobs:
   build-grpc:
-    name: Build & Publish gRPC Stubs
+    name: Build & Publish gRPC
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./grpc
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
-
       - name: Set up sbt
         uses: sbt/setup-sbt@v1
-
-      - name: Cache sbt dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.ivy2/cache
-            ~/.sbt
-            ~/.coursier
-          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
-          restore-keys: |
-            ${{ runner.os }}-sbt-
-
-      - name: Publish grpc-app locally
+      - name: Run sbt publishLocal
         run: sbt clean compile publishLocal
 
   build-stock-alert:
     name: Build & Test Stock Alert
     runs-on: ubuntu-latest
-    needs: build-grpc
     defaults:
       run:
         working-directory: ./stock-alert
+    needs: build-grpc  # ensures grpc is published locally first
     steps:
       - uses: actions/checkout@v4
       - name: Set up Java 21
@@ -55,26 +33,16 @@ jobs:
           java-version: '21'
       - name: Set up sbt
         uses: sbt/setup-sbt@v1
-      - name: Cache sbt dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.ivy2/cache
-            ~/.sbt
-            ~/.coursier
-          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
-          restore-keys: |
-            ${{ runner.os }}-sbt-
       - name: Run sbt tests
         run: sbt clean compile test
 
-  build-notification:
+  build-noti:
     name: Build & Test Notification Service
     runs-on: ubuntu-latest
-    needs: build-grpc
     defaults:
       run:
         working-directory: ./noti
+    needs: build-grpc  # ensures grpc is published locally first
     steps:
       - uses: actions/checkout@v4
       - name: Set up Java 21
@@ -84,15 +52,5 @@ jobs:
           java-version: '21'
       - name: Set up sbt
         uses: sbt/setup-sbt@v1
-      - name: Cache sbt dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.ivy2/cache
-            ~/.sbt
-            ~/.coursier
-          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
-          restore-keys: |
-            ${{ runner.os }}-sbt-
       - name: Run sbt tests
         run: sbt clean compile test
