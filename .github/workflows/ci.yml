@@ -8,11 +8,11 @@ on:
 
 jobs:
   build-grpc:
-    name: Build & Publish gRPC App
+    name: Build & Publish Local GRPC
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./grpc
+        working-directory: ./grpc/hello-world
     steps:
       - uses: actions/checkout@v4
 
@@ -38,8 +38,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-sbt-
 
-      - name: Run sbt clean compile publishLocal
-        run: sbt "set Compile / PB.protoSources := Seq(baseDirectory.value / \"hello-world\" / \"src\" / \"main\" / \"protobuf\")" clean compile publishLocal
+      - name: Build & publish grpc locally
+        run: sbt clean compile publishLocal
 
   build-stock-alert:
     name: Build & Test Stock Alert
@@ -73,10 +73,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-sbt-
 
-      - name: Run sbt clean compile test
+      - name: Run sbt tests
         run: sbt clean compile test
 
-  build-notification:
+  build-noti:
     name: Build & Test Notification Service
     runs-on: ubuntu-latest
     needs: build-grpc
@@ -108,5 +108,5 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-sbt-
 
-      - name: Run sbt clean compile test
+      - name: Run sbt tests
         run: sbt clean compile test
