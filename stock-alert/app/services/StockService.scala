@@ -24,7 +24,7 @@ class StockService @Inject()(
 )(implicit ec: ExecutionContext) {
 
  
-  def handleShipping(o: Orders): Future[ShippingResult] = {
+  def handleShipping(o: Orders,userCustomerId: Long): Future[ShippingResult] = {
     // First, retrieve the item details asynchronously from the database.
     itemsRepo.getItem(o.item).flatMap {
       case Some(item) =>
@@ -49,15 +49,15 @@ class StockService @Inject()(
           println(s"[StockService] LOW STOCK for ${o.item}. Triggering gRPC alert...")
 
           //Adding in the restock table 
-          val restockRow = Restock(None, o.item, o.customerId)
+          val restockRow = Restock(None, o.item, userCustomerId)
 
           restockRepo.add(restockRow).map { id =>
-            println(s"[DEBUG] Restock row added with id: $id for customer ${o.customerId} and item ${o.item}")
+            println(s"[DEBUG] Restock row added with id: $id for customer ${userCustomerId} and item ${o.item}")
           }.recover {
             case e: Exception =>
               println(s"[DEBUG] Failed to add restock row: ${e.getMessage}")
           }
-          // restockRepo.add(Restock(None, o.item, o.customerId))
+          // restockRepo.add(Restock(None, o.item, customerId))
           // 2. Prepare and send a gRPC alert to the external notification service.
           val request = StringMessage(
             s"LOW STOCK ALERT for item ${o.item}, attempted order for qty ${o.qty}"

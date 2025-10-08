@@ -1,12 +1,16 @@
 # --- !Ups
-CREATE TABLE IF NOT EXISTS customers (
+CREATE TABLE IF NOT EXISTS users (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   phone VARCHAR(20),
-  notifications VARCHAR(255)
+  notifications VARCHAR(255),
+  is_prime BOOLEAN DEFAULT FALSE,
+  role VARCHAR(50) DEFAULT 'customer' 
+  
 );
+
 
 CREATE TABLE IF NOT EXISTS items (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -19,21 +23,19 @@ CREATE TABLE IF NOT EXISTS orders (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   item BIGINT NOT NULL,
   qty BIGINT NOT NULL,
-  customerId BIGINT NOT NULL,
-  CONSTRAINT fk_item FOREIGN KEY (item) REFERENCES items(id),
-  CONSTRAINT fk_customer FOREIGN KEY (customerId) REFERENCES customers(id)
+  CONSTRAINT fk_order_item FOREIGN KEY (item) REFERENCES items(id)
 );
+
 CREATE TABLE IF NOT EXISTS restock (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   itemId BIGINT NOT NULL,
   customerId BIGINT NOT NULL,
   CONSTRAINT fk_restock_item FOREIGN KEY (itemId) REFERENCES items(id),
-  CONSTRAINT fk_restock_customer FOREIGN KEY (customerId) REFERENCES customers(id)
+  CONSTRAINT fk_restock_customer FOREIGN KEY (customerId) REFERENCES users(id)
 );
 
 # --- !Downs
-
-DROP TABLE IF EXISTS restock
+DROP TABLE IF EXISTS restock;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS items;
-DROP TABLE IF EXISTS customers;
+DROP TABLE IF EXISTS users;

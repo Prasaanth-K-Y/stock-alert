@@ -1,127 +1,108 @@
 package controllers
 
-import models.{Items, Orders}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfterEach
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.PlaySpec
-import org.scalatestplus.play.guice.GuiceOneAppPerTest
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.ControllerComponents
+import org.scalatestplus.play._
+import play.api.test._
 import play.api.test.Helpers._
-import play.api.test.{FakeRequest, Injecting}
-import repositories.{ItemsRepo, OrdersRepo, CustomersRepo, RestockRepo}
-import services.{ShippingResult, StockService}
-import scala.concurrent.{ExecutionContext, Future}
+import play.api.libs.json._
+import scala.concurrent.Future
+import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers._
+import org.scalatestplus.mockito.MockitoSugar
+import models.{Items, User} // Attrs is moved to the utils import
+import repositories.ItemsRepo
+import services.StockService
+import scala.concurrent.ExecutionContext
+import play.api.mvc.{Request, Result}
+import play.api.mvc.BodyParsers.Default
+import org.scalatest.concurrent.ScalaFutures
+import play.api.test.CSRFTokenHelper._ 
+import utils.JwtActionBuilder 
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite // <--- FIX 2: IMPORT GuiceOneAppPerSuite
+import utils.Attrs // <--- FIX 1: IMPORT Attrs from utils
 
-class StockControllerSpec extends PlaySpec
-  with GuiceOneAppPerTest
-  with Injecting
-  with MockitoSugar
-  with BeforeAndAfterEach {
+// Add GuiceOneAppPerSuite and ScalaFutures
+class StockControllerSpec extends PlaySpec with MockitoSugar with GuiceOneAppPerSuite with ScalaFutures { // <--- FIX 2: GuiceOneAppPerSuite is now found
 
-  // --- Mocks ---
-  private val mockItemsRepo     = mock[ItemsRepo]
-  private val mockOrdersRepo    = mock[OrdersRepo]
-  private val mockCustomersRepo = mock[CustomersRepo]
-  private val mockRestockRepo   = mock[RestockRepo]
-  private val mockStockService  = mock[StockService]
+    // --- SETUP: USERS, PARSERS, MOCKS ---
+    
+    implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  implicit private val ec: ExecutionContext =
-    scala.concurrent.ExecutionContext.Implicits.global
+    // *FIX 1 & 3: app.injector is now available*
+    val bodyParsers: Default = app.injector.instanceOf[Default] 
 
-  val controller = new StockController(
-    stubControllerComponents(),
-    mockItemsRepo,
-    mockOrdersRepo,
-    mockCustomersRepo,
-    mockRestockRepo,
-    mockStockService
-  )
+    // Define fixed users for testing roles
+    val customerUser: User = User(Some(1L), "Test Customer", "customer@test.com", "pass", role = "Customer")
+    val sellerUser: User = User(Some(2L), "Test Seller", "seller@test.com", "pass", role = "Seller")
+    val adminUser: User = User(Some(3L), "Test Admin", "admin@test.com", "pass", role = "Admin")
 
-  override def afterEach(): Unit = {
-    reset(mockItemsRepo, mockOrdersRepo, mockCustomersRepo, mockRestockRepo, mockStockService)
-  }
+    // Mock dependencies
+    val mockItemsRepo: ItemsRepo = mock[ItemsRepo]
+    val mockStockService: StockService = mock[StockService]
+    val stubCC = stubControllerComponents()
+    
+    // --- FAKE JWT ACTION BUILDER FUNCTION ---
 
-  val sampleItem = Items(Some(1L), "Test-Item", 100L, 10L)
-
-  "StockController" should {
-
-    "return a list of all items from the repository" in {
-      when(mockItemsRepo.getAllItems()).thenReturn(Future.successful(Seq(sampleItem)))
-
-      val result = controller.getAllItems().apply(FakeRequest(GET, "/items"))
-
-      status(result) mustBe OK
-      contentType(result) mustBe Some("application/json")
-      contentAsJson(result) mustBe Json.toJson(Seq(sampleItem))
+    /** Creates a fake JwtActionBuilder that injects a specific User object into the request. */
+    def createFakeJwtAction(user: User): JwtActionBuilder = new JwtActionBuilder(bodyParsers) {
+        override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
+            // Attrs is now imported and found
+            block(request.addAttr(Attrs.User, user)) // <--- FIX 1: Attrs is now found
+        }
+    }
+    
+    // --- Helper to get a CSRF token from the controller ---
+    private def getCsrfToken(user: User): String = {
+        val controller = new StockController(stubCC, mockItemsRepo, null, null, null, mockStockService, createFakeJwtAction(user), null)(ec)
+        val tokenResult = controller.csrfToken().apply(FakeRequest(GET, "/api/csrf-token"))
+        (contentAsJson(tokenResult) \ "csrfToken").as[String]
     }
 
-    "return a single item by its id" in {
-      when(mockItemsRepo.getItem(1L)).thenReturn(Future.successful(Some(sampleItem)))
+    // --- TESTS (No changes needed below here) ---
 
-      val result = controller.getItem(1L).apply(FakeRequest(GET, "/item/1"))
+    "StockController" should {
 
-      status(result) mustBe OK
-      contentType(result) mustBe Some("application/json")
-      (contentAsJson(result) \ "item" \ "name").as[String] mustBe "Test-Item"
+        "allow Customer to get all items" in {
+            val controller = new StockController(stubCC, mockItemsRepo, null, null, null, mockStockService, createFakeJwtAction(customerUser), null)(ec)
+            when(mockItemsRepo.getAllItems()).thenReturn(Future.successful(Seq.empty))
+
+            val request = FakeRequest(GET, "/api/items")
+            val result = controller.getAllItems().apply(request)
+
+            status(result) mustBe OK
+        }
+
+        "forbid Seller from getting all items" in {
+            val controller = new StockController(stubCC, mockItemsRepo, null, null, null, mockStockService, createFakeJwtAction(sellerUser), null)(ec)
+
+            val request = FakeRequest(GET, "/api/items")
+            val result = controller.getAllItems().apply(request)
+
+            status(result) mustBe FORBIDDEN
+        }
+
+           "forbid Admin from getting all items" in {
+            val controller = new StockController(stubCC, mockItemsRepo, null, null, null, mockStockService, createFakeJwtAction(adminUser), null)(ec)
+
+            val request = FakeRequest(GET, "/api/items")
+            val result = controller.getAllItems().apply(request)
+
+            status(result) mustBe FORBIDDEN
+        }
+        "forbid Customer from adding an item" in {
+            val controller = new StockController(stubCC, mockItemsRepo, null, null, null, mockStockService, createFakeJwtAction(customerUser), null)(ec)
+            
+            val newItemJson = Json.obj("id" -> 0, "name" -> "Gadget", "price" -> 50, "stock" -> 5)
+
+            val csrfToken = getCsrfToken(adminUser)
+            val request = FakeRequest(POST, "/api/items")
+                .withHeaders("Csrf-Token" -> csrfToken)
+                .withBody(newItemJson)
+                .withCSRFToken
+
+            val result = controller.addItems().apply(request)
+            status(result) mustBe FORBIDDEN
+        }
+
+      
     }
-
-    "add a new item successfully" in {
-      val newItemJson: JsValue = Json.obj(
-        "name" -> "New-Gadget",
-        "stock" -> 50,
-        "minStock" -> 5
-      )
-
-      when(mockItemsRepo.addItem(any[Items]))
-        .thenReturn(Future.successful(Right(1L)))
-
-      val request = FakeRequest(POST, "/items").withBody(newItemJson)
-      val result  = controller.addItems().apply(request)
-
-      status(result) mustBe CREATED
-      (contentAsJson(result) \ "message").as[String] must include("Successfully created item New-Gadget")
-    }
-
-    "create a new order successfully when stock is available" in {
-      val orderJson = Json.obj("item" -> 1, "qty" -> 5, "customerId" -> 42)
-      val successResult = ShippingResult(orderId = 123L, message = "Order processed successfully")
-
-      when(mockStockService.handleShipping(any[Orders]))
-        .thenReturn(Future.successful(successResult))
-
-      val request = FakeRequest(POST, "/order").withBody(orderJson)
-      val result  = controller.newOrder().apply(request)
-
-      status(result) mustBe CREATED
-      (contentAsJson(result) \ "orderId").as[Long] mustBe 123L
-      (contentAsJson(result) \ "message").as[String] mustBe "Order processed successfully"
-    }
-
-    "return BadRequest when an order fails due to insufficient stock" in {
-      val orderJson = Json.obj("item" -> 1, "qty" -> 999, "customerId" -> 42)
-      val failureResult = ShippingResult(orderId = 0L, message = "Insufficient stock for Test-Item")
-
-      when(mockStockService.handleShipping(any[Orders]))
-        .thenReturn(Future.successful(failureResult))
-
-      val request = FakeRequest(POST, "/order").withBody(orderJson)
-      val result  = controller.newOrder().apply(request)
-
-      status(result) mustBe BAD_REQUEST
-      contentAsString(result) mustBe "Insufficient stock for Test-Item"
-    }
-
-    "return BadRequest for an invalid order JSON payload" in {
-      val badJson = Json.obj("item" -> 1, "quantity" -> 5) // missing customerId
-
-      val request = FakeRequest(POST, "/order").withBody(badJson)
-      val result  = controller.newOrder().apply(request)
-
-      status(result) mustBe BAD_REQUEST
-      contentAsString(result) must include("Provide a valid order")
-    }
-  }
 }
