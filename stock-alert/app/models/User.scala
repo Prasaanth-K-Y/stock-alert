@@ -10,7 +10,7 @@ case class User(
     phone: Option[String] = None,
     notifications: Option[String] = None,
     isPrime: Boolean = false,
-    role: String = "customer" // New field
+    role: String = "customer" 
 )
 
 object User {

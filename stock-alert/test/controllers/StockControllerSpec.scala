@@ -8,7 +8,7 @@ import scala.concurrent.Future
 import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers._
 import org.scalatestplus.mockito.MockitoSugar
-import models.{Items, User} // Attrs is moved to the utils import
+import models.{Items, User} 
 import repositories.ItemsRepo
 import services.StockService
 import scala.concurrent.ExecutionContext
@@ -17,8 +17,8 @@ import play.api.mvc.BodyParsers.Default
 import org.scalatest.concurrent.ScalaFutures
 import play.api.test.CSRFTokenHelper._ 
 import utils.JwtActionBuilder 
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite // <--- FIX 2: IMPORT GuiceOneAppPerSuite
-import utils.Attrs // <--- FIX 1: IMPORT Attrs from utils
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite 
+import utils.Attrs 
 
 // Add GuiceOneAppPerSuite and ScalaFutures
 class StockControllerSpec extends PlaySpec with MockitoSugar with GuiceOneAppPerSuite with ScalaFutures { // <--- FIX 2: GuiceOneAppPerSuite is now found
@@ -45,8 +45,8 @@ class StockControllerSpec extends PlaySpec with MockitoSugar with GuiceOneAppPer
     /** Creates a fake JwtActionBuilder that injects a specific User object into the request. */
     def createFakeJwtAction(user: User): JwtActionBuilder = new JwtActionBuilder(bodyParsers) {
         override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
-            // Attrs is now imported and found
-            block(request.addAttr(Attrs.User, user)) // <--- FIX 1: Attrs is now found
+            // Attrs is imported and found
+            block(request.addAttr(Attrs.User, user)) 
         }
     }
     
@@ -57,7 +57,6 @@ class StockControllerSpec extends PlaySpec with MockitoSugar with GuiceOneAppPer
         (contentAsJson(tokenResult) \ "csrfToken").as[String]
     }
 
-    // --- TESTS (No changes needed below here) ---
 
     "StockController" should {
 
