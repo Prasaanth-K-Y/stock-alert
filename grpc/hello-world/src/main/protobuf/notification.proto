@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package shared;
+
+
+message StringMessage {
+  string value = 1;
+}
+
+
+service StringService {
+  rpc SendString (StringMessage) returns (StringMessage);
+}
