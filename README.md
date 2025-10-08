@@ -79,7 +79,7 @@ flowchart TD
 | password      | VARCHAR               | User password                          |
 | phone         | VARCHAR               | User phone number                      |
 | notifications | VARCHAR               | Comma-separated notifications for user |
-| is_prime      | BOOLEAN               | Premium user flag (default FALSE)      |
+| isPrime      | BOOLEAN               | Premium user flag (default FALSE)      |
 | role          | VARCHAR               | User role (default 'customer')         |
 
 ### 2. Items Table
