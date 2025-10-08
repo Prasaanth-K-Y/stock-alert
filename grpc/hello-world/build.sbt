@@ -13,10 +13,10 @@ libraryDependencies ++= Seq(
 )
 
 Compile / PB.protoSources := Seq(
-  baseDirectory.value / "hello-world" / "src" / "main" / "protobuf"
+  baseDirectory.value / "src" / "main" / "protobuf"
 )
-
 
 Compile / PB.targets := Seq(
   scalapb.gen(grpc = true) -> (Compile / sourceManaged).value
 )
+
