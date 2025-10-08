@@ -12,7 +12,9 @@ libraryDependencies ++= Seq(
   "io.grpc" % "grpc-netty" % "1.62.2"
 )
 
-Compile / PB.protoSources += baseDirectory.value / "src" / "main" / "protobuf"
+Compile / PB.protoSources := Seq(
+  baseDirectory.value / "hello-world" / "src" / "main" / "protobuf"
+)
 
 
 Compile / PB.targets := Seq(
