@@ -98,7 +98,6 @@ flowchart TD
 | id          | BIGINT AUTO_INCREMENT | Primary key                      |
 | item        | BIGINT                | Foreign key referencing Items.id |
 | qty         | BIGINT                | Quantity ordered                 |
-| userId      | BIGINT                | Foreign key referencing Users.id |
 
 ### 4. Restock Table
 
@@ -127,7 +126,7 @@ flowchart TD
 
 | Method | Endpoint | Role     | Description                    | Example Payload                        |
 | ------ | -------- | -------- | ------------------------------ | -------------------------------------- |
-| POST   | /orders  | Customer | Place an order, reducing stock | `{ "item": 1, "qty": 7, "userId": 1 }` |
+| POST   | /orders  | Customer | Place an order, reducing stock | `{ "item": 1, "qty": 7 }` |
 | GET    | /orders  | Admin    | List all orders                | N/A                                    |
 
 > **Note:** Orders that drop stock below `minStock` trigger a gRPC alert to the Notification Service. Non-prime customers cannot order more than 2 items per order.
@@ -136,12 +135,12 @@ flowchart TD
 
 | Method | Endpoint        | Role                   | Description               | Example Payload                                                                                                      |
 | ------ | --------------- | ---------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| POST   | /user           | Public                 | Register a new user       | `{ "name": "John", "email": "john@example.com", "password": "pass123", "phone": "1234567890", "notifications": "" }` |
+| POST   | /user           | Public                 | Register a new user       | `{ "name": "John", "email": "john@example.com", "password": "pass123", "phone": "1234567890", "notifications": "" ,"isPrime": true ,"role":"Customer"}` |
 | GET    | /user           | Admin                  | List all users            | N/A                                                                                                                  |
 | GET    | /user/:id       | Admin                  | Fetch a user by ID        | N/A                                                                                                                  |
 | PUT    | /user/:id/phone | Customer (own)         | Update user's phone       | `{ "phone": "0987654321" }`                                                                                          |
 | DELETE | /user/:id       | Admin / Customer (own) | Delete a user             | N/A                                                                                                                  |
-| POST   | /login          | Public                 | User login (JWT returned) | `{ "name": "John", "password": "pass123" }`                                                                          |
+| POST   | /login          | Public                 | User login (JWT returned) | `{ "email": "John@gmail.com", "password": "pass123" }`                                                                          |
 
 #### CSRF Token
 
@@ -160,8 +159,7 @@ POST `/orders` with:
 ```json
 {
   "item": 1,
-  "qty": 7,
-  "userId": 1
+  "qty": 7
 }
 ```
 
@@ -172,10 +170,7 @@ POST `/orders` with:
 Response:
 
 ```json
-{
-  "orderId": 0,
-  "message": "Order NOT placed. Alert: LOW STOCK ALERT for item 1, attempted order for qty 7"
-}
+Order NOT placed. Alert: Order ID LOW STOCK ALERT for item 1, attempted order for qty 7 inserted successfully
 ```
 
 ### Register User (Public)
@@ -184,11 +179,14 @@ POST `/user`:
 
 ```json
 {
-  "name": "John",
-  "email": "john@example.com",
-  "password": "pass123",
+  "name": "Rom reign",
+  "email": "RR@example.com",
+  "password": "123456",
   "phone": "1234567890",
-  "notifications": ""
+  "notifications": "yes",
+  "isPrime" : true,
+  "role" : "Customer"
+
 }
 ```
 
@@ -197,7 +195,7 @@ Response:
 ```json
 {
   "id": 1,
-  "message": "User John created"
+  "message": "User Rom reign registered"
 }
 ```
 
@@ -207,8 +205,8 @@ POST `/login`:
 
 ```json
 {
-  "name": "John",
-  "password": "pass123"
+  "email": "RR@example.com",
+  "password": "123456"
 }
 ```
 
@@ -216,8 +214,7 @@ Response:
 
 ```json
 {
-  "userId": 1,
-  "message": "Login successful"
+    "token": "HS256 token will be generated here"
 }
 ```
 
