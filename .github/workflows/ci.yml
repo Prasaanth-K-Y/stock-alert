@@ -11,6 +11,20 @@ jobs:
     name: Build All Projects
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: 000000
+          MYSQL_DATABASE: testdb
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
     steps:
       - uses: actions/checkout@v4
 
@@ -33,6 +47,19 @@ jobs:
           key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
           restore-keys: |
             ${{ runner.os }}-sbt-
+
+      # Step 0: Wait for MySQL to be ready
+      - name: Wait for MySQL
+        run: |
+          echo "Waiting for MySQL..."
+          for i in {1..20}; do
+            if mysql -h 127.0.0.1 -P 3306 -u root -p000000 -e "SELECT 1" >/dev/null 2>&1; then
+              echo "MySQL is ready!"
+              break
+            fi
+            echo "MySQL not ready yet... sleeping 3s"
+            sleep 3
+          done
 
       # Step 1: Build and publish grpc-app locally
       - name: Build grpc-app
