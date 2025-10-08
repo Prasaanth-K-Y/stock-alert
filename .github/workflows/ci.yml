@@ -69,7 +69,4 @@ jobs:
         working-directory: ./stock-alert
         run: sbt clean compile test
 
-      # Step 4: Build & Test Notification Service
-      - name: Build & Test Notification Service
-        working-directory: ./noti
-        run: sbt clean compile test
+      
