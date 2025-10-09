@@ -9,7 +9,7 @@ object JwtUtils {
 
   private val secret = "super-secret-key"
 
-  /** Validate token and return Users if valid */
+  //Validate token and return Users if valid
   def validateToken(token: String): Option[User] = {
     val now = Clock.systemUTC().instant().getEpochSecond
 
@@ -22,7 +22,7 @@ object JwtUtils {
     }
   }
 
-  /** Generate JWT from Users */
+  // Generate JWT from Users
   def createToken(user: User, expirationSeconds: Long = 3600): String = {
     val claim = JwtClaim(
       content = Json.toJson(user).toString(),

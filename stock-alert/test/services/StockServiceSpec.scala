@@ -35,7 +35,7 @@ class StockServiceSpec
       when(mockOrdersRepo.newOrder(order)).thenReturn(Future.successful(100L))
       when(mockItemsRepo.upd(sampleItem, 7)).thenReturn(Future.successful(1))
 
-      val resultF = service.handleShipping(order, 1L) // customerId passed here
+      val resultF = service.handleShipping(order, 1L) 
 
       whenReady(resultF) { result =>
         result.orderId mustBe 100L
