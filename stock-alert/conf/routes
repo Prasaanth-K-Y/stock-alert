@@ -15,3 +15,8 @@ GET     /user/:id          controllers.UserController.getUser(id: Long)
 POST    /login                  controllers.AuthController.login()  
 PUT   /user/:id/phone   controllers.UserController.updatePhone(id: Long)
 DELETE  /user/:id          controllers.UserController.deleteUser(id: Long)
+
+GET     /refs           controllers.AuthController.renewAccessToken() 
+POST    /login                  controllers.AuthController.login()  
+POST    /logout                controllers.AuthController.logout()  
+GET     /expiry                 controllers.AuthController.expiry()
