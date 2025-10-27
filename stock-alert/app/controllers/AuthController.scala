@@ -27,11 +27,12 @@ class AuthController @Inject()(
     extends AbstractController(cc) {
 
 
-  // val redirectUri   = "http://localhost:9002/callback"
-  // val authServerUri = "https://accounts.google.com/o/oauth2/v2/auth"
-  // val tokenEndpoint = "https://oauth2.googleapis.com/token"
   
-
+  val clientId      = ""
+  val clientSecret  = ""
+  val redirectUri   = ""
+  val authServerUri = ""
+  val tokenEndpoint = ""
   // PKCE helper
   private def generateCodeVerifier(): (String, String) = {
     val verifier = Random.alphanumeric.take(64).mkString
@@ -207,6 +208,7 @@ def callback(code: String, state: Option[String]): Action[AnyContent] = Action.a
                                     id            = None,
                                     name          = name,
                                     email         = finalEmail,
+                                    address       = "",
                                     phone         = phone,
                                     notifications = None,
                                     isPrime       = isPrime,

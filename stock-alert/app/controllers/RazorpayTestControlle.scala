@@ -9,7 +9,7 @@ import org.json.JSONObject
 class RazorpayTestController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
   // Replace with your actual Test Keys
-  // val client = new RazorpayClient("rzp_test_RTeOMdWBZh4V1U", "TKFcAIgU6VG7ULhvR3YoDA7d")
+  val client = new RazorpayClient("rzp_test_RTeOMdWBZh4V1U", "TKFcAIgU6VG7ULhvR3YoDA7d")
 
   def createOrder(amount: Int) = Action {
     val orderRequest = new JSONObject()
