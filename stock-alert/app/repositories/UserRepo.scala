@@ -48,4 +48,5 @@ def updateNotifications(id: Long, notification: String): Future[Int] = {
   def deleteUser(id: Long): Future[Int] = db.run(users.filter(_.id === id).delete)
 def getPhone(id: Long): Future[Option[String]] =
   db.run(users.filter(_.id === id).map(_.phone).result.headOption).map(_.flatten)
+   
 }

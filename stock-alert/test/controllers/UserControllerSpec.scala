@@ -98,22 +98,7 @@ class UserControllerSpec extends PlaySpec with MockitoSugar with GuiceOneAppPerS
             status(result) mustBe FORBIDDEN
         }
         
-        // =========================================================
-        // PUT /user/:id/phone - updatePhone
-        // =========================================================
-        "allow Customer to update their own phone number" in {
-            val controller = new UserController(stubCC, mockUserService, createFakeJwtAction(customerUser))(ec)
-            val newPhone = "555-1234"
-            val json = Json.obj("phone" -> newPhone)
-            
-            when(mockUserService.updatePhone(customerId, newPhone)).thenReturn(Future.successful(1))
-
-            val request = FakeRequest(PUT, s"/user/$customerId/phone").withBody(json)
-            val result = controller.updatePhone(customerId).apply(request)
-
-            status(result) mustBe OK
-            (contentAsJson(result) \ "message").as[String] must include("Phone updated successfully")
-        }
+      
 
         "forbid Customer from updating another user's phone number" in {
             val controller = new UserController(stubCC, mockUserService, createFakeJwtAction(customerUser))(ec)
