@@ -12,11 +12,12 @@ GET     /csrf-token            controllers.StockController.csrfToken()
 POST  /user   controllers.UserController.addUser
 GET     /user              controllers.UserController.getAll()
 GET     /user/:id          controllers.UserController.getUser(id: Long)
-POST    /login                  controllers.AuthController.login()  
 PUT   /user/:id/phone   controllers.UserController.updatePhone(id: Long)
 DELETE  /user/:id          controllers.UserController.deleteUser(id: Long)
 
 GET     /refs           controllers.AuthController.renewAccessToken() 
-POST    /login                  controllers.AuthController.login()  
+GET   /login       controllers.AuthController.loginRedirect()
 POST    /logout                controllers.AuthController.logout()  
-GET     /expiry                 controllers.AuthController.expiry()
+GET     /pay/:amount     controllers.RazorpayTestController.createOrder(amount: Int)
+GET     /callback    controllers.AuthController.callback(code: String, state: Option[String])
+POST    /auth/signup      controllers.AuthController.signupWithOAuth

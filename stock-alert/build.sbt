@@ -22,6 +22,19 @@ libraryDependencies ++= Seq(
   "grpc-app" %% "grpc-app" % "1.0-SNAPSHOT",// Stub file for grpc 
   "io.grpc" % "grpc-netty-shaded" % "1.64.0",// shaded is used instead of grpc netty for docker compatability
   "io.grpc" % "grpc-services" % "1.64.0"// Grpc class builder
+
 )
 
+libraryDependencies ++= Seq(
+  guice,
+  "com.softwaremill.sttp.client3" %% "core" % "3.9.6",
+  "com.softwaremill.sttp.client3" %% "play-json" % "3.9.6"
+)
+libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.9.0"
 
+
+
+libraryDependencies ++= Seq(
+  "com.razorpay" % "razorpay-java" % "1.4.4",
+  "org.json" % "json" % "20230227"
+)

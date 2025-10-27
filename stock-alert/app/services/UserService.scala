@@ -23,6 +23,9 @@ class UserService @Inject()(userRepo: UserRepo)(implicit ec: ExecutionContext) {
   // Deletes a user by ID, returns number of rows deleted
   def removeUser(id: Long): Future[Int] = userRepo.deleteUser(id)
 
+  def getPhone(id: Long): Future[Option[String]] = userRepo.getPhone(id)
+
+
   // Fetches a user by email, returns Some(user) or None if not found
   def fetchByEmail(email: String): Future[Option[User]] = userRepo.fetchByEmail(email)
 }

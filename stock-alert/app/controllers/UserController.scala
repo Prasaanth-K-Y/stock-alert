@@ -7,6 +7,8 @@ import play.api.libs.json._
 import services.UserService
 import utils.{JwtActionBuilder, Attrs}
 import models.User 
+import utils.CryptoUtils
+
 
 @Singleton
 class UserController @Inject()(
@@ -35,22 +37,26 @@ class UserController @Inject()(
   }
 
   // PUT /user/:id/phone - Customer can update their own phone
-  def updatePhone(id: Long): Action[JsValue] = jwtAction(parse.json).async { request =>
-    val user = request.attrs(Attrs.User)
-    if (user.role != "Customer" || user.id.getOrElse(0L) != id) {
-      Future.successful(Forbidden("You can only update your own phone number"))
-    } else {
-      (request.body \ "phone").asOpt[String] match {
-        case Some(phone) =>
-          service.updatePhone(id, phone).map { updatedRows =>
-            if (updatedRows > 0) Ok(Json.obj("message" -> "Phone updated successfully"))
-            else NotFound(Json.obj("error" -> "User not found"))
-          }
-        case None =>
-          Future.successful(BadRequest(Json.obj("error" -> "Missing phone field")))
-      }
+def updatePhone(id: Long): Action[JsValue] = jwtAction(parse.json).async { request =>
+  val user = request.attrs(Attrs.User)
+
+  if ( user.id.getOrElse(0L) != id) {
+    Future.successful(Forbidden("You can only update your own phone number"))
+  } else {
+    (request.body \ "phone").asOpt[String] match {
+      case Some(phone) =>
+        val encryptedPhone = CryptoUtils.encrypt(phone)
+        service.updatePhone(id, encryptedPhone).map { updatedRows =>
+          if (updatedRows > 0) Ok(Json.obj("message" -> "Phone updated successfully"))
+          else NotFound(Json.obj("error" -> "User not found"))
+        }
+
+      case None =>
+        Future.successful(BadRequest(Json.obj("error" -> "Missing phone field")))
     }
   }
+}
+
 
   // DELETE /user/:id - Admin or Customer deleting own account
   def deleteUser(id: Long): Action[AnyContent] = jwtAction.async { request =>
@@ -73,4 +79,21 @@ class UserController @Inject()(
       }
     )
   }
+  def getPhone(id: Long): Action[AnyContent] = jwtAction.async { request =>
+  val user = request.attrs(Attrs.User)
+
+  if (user.role != "Customer" || user.id.getOrElse(0L) != id) {
+    Future.successful(Forbidden("You can only view your own phone number"))
+  } else {
+    service.getPhone(id).map {
+      case Some(encryptedPhone) =>
+        val decryptedPhone = CryptoUtils.decrypt(encryptedPhone)
+        Ok(Json.obj("phone" -> decryptedPhone))
+
+      case None =>
+        NotFound(Json.obj("error" -> "User not found"))
+    }
+  }
+}
+
 }

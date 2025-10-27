@@ -6,7 +6,7 @@ case class User(
     id: Option[Long],
     name: String,
     email: String,
-    password: String,
+    address: Option[String] = None,
     phone: Option[String] = None,
     notifications: Option[String] = None,
     isPrime: Boolean = false,
