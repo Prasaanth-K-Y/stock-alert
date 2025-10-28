@@ -57,7 +57,7 @@ class AuthController @Inject()(
     (verifier, challenge)
   }
 
-  // =======================================================================
+  // ======================================================================
   // LOGIN FLOW (Redirect user to Google OAuth2)
   // =======================================================================
   def loginRedirect(): Action[AnyContent] = Action { implicit request =>

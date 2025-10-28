@@ -82,7 +82,7 @@ def updatePhone(id: Long): Action[JsValue] = jwtAction(parse.json).async { reque
   def getPhone(id: Long): Action[AnyContent] = jwtAction.async { request =>
   val user = request.attrs(Attrs.User)
 
-  if (user.role != "Customer" || user.id.getOrElse(0L) != id) {
+  if ( user.id.getOrElse(0L) != id) {
     Future.successful(Forbidden("You can only view your own phone number"))
   } else {
     service.getPhone(id).map {

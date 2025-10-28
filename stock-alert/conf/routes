@@ -21,7 +21,7 @@ DELETE  /user/:id          controllers.UserController.deleteUser(id: Long)
 
 
 
-GET     /refs           controllers.AuthController.renewAccessToken() 
+GET     /renew           controllers.AuthController.renewAccessToken() 
 GET   /login       controllers.AuthController.loginRedirect()
 POST    /logout                controllers.AuthController.logout()  
 GET     /pay/:amount     controllers.RazorpayTestController.createOrder(amount: Int)
