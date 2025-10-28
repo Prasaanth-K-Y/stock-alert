@@ -92,7 +92,7 @@ class AuthController @Inject()(
 
   // =======================================================================
   // SIGNUP FLOW (Redirect to Google OAuth2 with signup metadata)
-  // =======================================================================
+  // ======================================================================
   def signupWithOAuth(): Action[Map[String, Seq[String]]] =
     Action.async(parse.formUrlEncoded) { implicit request =>
       val nameOpt    = request.body.get("name").flatMap(_.headOption)
