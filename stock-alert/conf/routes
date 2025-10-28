@@ -15,6 +15,12 @@ GET     /user/:id          controllers.UserController.getUser(id: Long)
 PUT   /user/:id/phone   controllers.UserController.updatePhone(id: Long)
 DELETE  /user/:id          controllers.UserController.deleteUser(id: Long)
 
+
+
+
+
+
+
 GET     /refs           controllers.AuthController.renewAccessToken() 
 GET   /login       controllers.AuthController.loginRedirect()
 POST    /logout                controllers.AuthController.logout()  

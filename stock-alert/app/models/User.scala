@@ -16,5 +16,4 @@ case class User(
 
 object User {
   implicit val fmt: OFormat[User] = Json.format[User]// Provide Json format , used in the controllers (used in Validate)
-
 }

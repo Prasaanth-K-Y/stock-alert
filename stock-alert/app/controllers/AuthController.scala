@@ -174,7 +174,7 @@ class AuthController @Inject()(
         val role     = roleRaw.capitalize
         val validRoles = Set("Seller", "Customer", "Admin")
 
-        // ❌ Invalid role provided during signup
+        //  Invalid role provided during signup
         if (flowType == "signup" && !validRoles.contains(role)) {
           Future.successful(BadRequest(Json.obj("error" -> "Invalid role. Allowed roles: Seller, Customer, Admin")))
         } else {

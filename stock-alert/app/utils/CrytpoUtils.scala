@@ -20,6 +20,7 @@ object CryptoUtils {
     cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec)
     Base64.getEncoder.encodeToString(cipher.doFinal(value.getBytes("UTF-8")))
   }
+  
 
   // Decrypts a Base64-encoded string encrypted with the above method
   // Returns the original plaintext string
