@@ -21,3 +21,6 @@ POST    /logout                controllers.AuthController.logout()
 GET     /pay/:amount     controllers.RazorpayTestController.createOrder(amount: Int)
 GET     /callback    controllers.AuthController.callback(code: String, state: Option[String])
 POST    /auth/signup      controllers.AuthController.signupWithOAuth
+
+GET   /auth/verify   controllers.AuthController.verify2FA
+GET   /auth/setup/:userEmail   controllers.AuthController.setup2FA(userEmail: String)

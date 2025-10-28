@@ -14,5 +14,6 @@ case class GoogleUserInfo(
 )
 
 object GoogleUserInfo {
-  implicit val fmt: OFormat[GoogleUserInfo] = Json.format[GoogleUserInfo]
+  implicit val fmt: OFormat[GoogleUserInfo] = Json.format[GoogleUserInfo]// Provide Json format , used in the controllers (used in Validate)
+
 }

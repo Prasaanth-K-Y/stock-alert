@@ -17,7 +17,8 @@ CREATE TABLE users (
   notifications VARCHAR(255),
   is_prime BOOLEAN DEFAULT FALSE,
   address VARCHAR(255) NOT NULL,
-  role VARCHAR(50) DEFAULT 'customer'
+  role VARCHAR(50) DEFAULT 'customer',
+  totp_secret VARCHAR(255)  
 );
 
 CREATE TABLE items (

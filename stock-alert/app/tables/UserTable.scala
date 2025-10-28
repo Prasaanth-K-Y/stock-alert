@@ -11,7 +11,10 @@ def address = column[String]("address")
   def phone = column[Option[String]]("phone")
   def notifications = column[Option[String]]("notifications")
   def isPrime = column[Boolean]("is_prime", O.Default(false))
-  def role = column[String]("role", O.Default("customer")) // New column
+  def totpSecret = column[Option[String]]("totp_secret")
+  def role = column[String]("role", O.Default("customer")) 
 
-  def * = (id.?, name, email, address, phone, notifications, isPrime, role).mapTo[User]
-  }
+    // Relates MySQL table and Scala case class
+
+def * = (id.?, name, email, address, phone, notifications, isPrime, role, totpSecret).mapTo[User]  
+}

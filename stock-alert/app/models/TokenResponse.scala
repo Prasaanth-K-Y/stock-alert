@@ -11,5 +11,5 @@ case class TokenResponse(
 )
 
 object TokenResponse {
-  implicit val fmt: OFormat[TokenResponse] = Json.format[TokenResponse]
+  implicit val fmt: OFormat[TokenResponse] = Json.format[TokenResponse]// Provide Json format , used in the controllers (used in Validate)
 }
