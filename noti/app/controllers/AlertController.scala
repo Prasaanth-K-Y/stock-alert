@@ -12,3 +12,4 @@ class AlertController @Inject()(cc: ControllerComponents)//, repo: OrderAlertsRe
 
   
 }
+// sbt -Dconfig.file="conf/application.conf" "runMain shared.notification.NotificationServer"

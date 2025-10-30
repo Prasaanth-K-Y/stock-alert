@@ -44,5 +44,9 @@ libraryDependencies += "com.warrenstrange" % "googleauth" % "1.4.0"
 
 //modern alternative (better maintained)
 // libraryDependencies += "dev.samstevens.totp" % "totp" % "1.7.1"
-
 libraryDependencies += "commons-codec" % "commons-codec" % "1.16.0"
+
+
+//dotenv
+libraryDependencies += "io.github.cdimascio" % "java-dotenv" % "5.2.2"
+

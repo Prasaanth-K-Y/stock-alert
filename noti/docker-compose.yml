@@ -1,23 +1,21 @@
 services:
 # PORTS
-# mysql - 3309
-# stock - 9001
   mysql-noti:
     image: mysql:8.0
     container_name: mysql-noti
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 000000
-      MYSQL_DATABASE: testdb
-      MYSQL_USER: notiuser
-      MYSQL_PASSWORD: notipass
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3309:3306"   
+      - "${MYSQL_NOTI_PORT}:3306"   
     volumes:
       - mysql-noti-data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p000000"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 10s
       retries: 5
@@ -35,13 +33,13 @@ services:
       mysql-noti:
         condition: service_healthy
     ports:
-      - "9001:9001"
-      - "50052:50052"
+      - "${NOTIFICATION_HTTP_PORT}:9001"
+      - "${NOTIFICATION_GRPC_PORT}:50052"
     environment:
-      DB_HOST: mysql-noti
-      DB_NAME: testdb
-      DB_USER: notiuser
-      DB_PASSWORD: notipass
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
     volumes:
       - ./logs:/opt/docker/logs  
     networks:

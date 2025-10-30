@@ -16,4 +16,9 @@ class RestockRepo @Inject()(dbConfigProvider: play.api.db.slick.DatabaseConfigPr
 
   // Fetches all restock entries for a given item ID
   def getByItemId(itemId: Long): Future[Seq[Restock]] = db.run(r.filter(_.itemId === itemId).result)
-}
+
+  // Deletes all restock entries for a given item ID
+  def deleteByItemId(itemId: Long): Future[Int] = {
+    db.run(r.filter(_.itemId === itemId).delete)
+  }
+}   

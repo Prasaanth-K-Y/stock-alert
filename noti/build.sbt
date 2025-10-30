@@ -18,6 +18,11 @@ libraryDependencies ++= Seq(
   "io.grpc" % "grpc-netty-shaded" % "1.64.0",// netty cannot be used in docker , so netty-shaded is used 
   "org.apache.pekko" %% "pekko-grpc-runtime" % "1.0.2"// pekko grpc file
 )
+
+//dotenv
+libraryDependencies += "io.github.cdimascio" % "java-dotenv" % "5.2.2"
+
+
 Compile / unmanagedSourceDirectories += baseDirectory.value / "src" / "main" / "scala" // Inorder to run via src as entry point instead of app
 
 

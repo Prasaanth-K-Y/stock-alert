@@ -28,4 +28,12 @@ class UserService @Inject()(userRepo: UserRepo)(implicit ec: ExecutionContext) {
 
   // Fetches a user by email, returns Some(user) or None if not found
   def fetchByEmail(email: String): Future[Option[User]] = userRepo.fetchByEmail(email)
+
+  // In UserService.scala
+// Update user role
+def updateRole(id: Long, newRole: String): Future[Int] = {
+  userRepo.updateRole(id, newRole)
+}
+
+
 }

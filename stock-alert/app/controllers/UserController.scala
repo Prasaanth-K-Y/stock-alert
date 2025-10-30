@@ -45,6 +45,7 @@ def updatePhone(id: Long): Action[JsValue] = jwtAction(parse.json).async { reque
   } else {
     (request.body \ "phone").asOpt[String] match {
       case Some(phone) =>
+        // Encrypt the phone number before updating
         val encryptedPhone = CryptoUtils.encrypt(phone)
         service.updatePhone(id, encryptedPhone).map { updatedRows =>
           if (updatedRows > 0) Ok(Json.obj("message" -> "Phone updated successfully"))
@@ -79,6 +80,8 @@ def updatePhone(id: Long): Action[JsValue] = jwtAction(parse.json).async { reque
       }
     )
   }
+
+  // GetPhone Decrypted phone number
   def getPhone(id: Long): Action[AnyContent] = jwtAction.async { request =>
   val user = request.attrs(Attrs.User)
 
@@ -95,5 +98,22 @@ def updatePhone(id: Long): Action[JsValue] = jwtAction(parse.json).async { reque
     }
   }
 }
+// PUT /user/role/:role - Updates current user's role (Admin privilege required)
+def updateRole(role: String , id : Long): Action[AnyContent] = jwtAction.async { request =>
+  val user = request.attrs(Attrs.User)
+
+ 
+    val targetId = user.id.getOrElse(0L)
+
+    service.updateRole(id, role).map { updated =>
+      if (updated > 0)
+        Ok(Json.obj("message" -> s"User $targetId role updated to $role"))
+      else
+        NotFound(Json.obj("error" -> "User not found"))
+    }
+  
+}
+
+
 
 }

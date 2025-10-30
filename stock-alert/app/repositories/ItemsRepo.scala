@@ -33,6 +33,7 @@ class ItemsRepo @Inject()(dbc: DatabaseConfigProvider)(implicit ec: ExecutionCon
     }
   }
 
+  // Updates an item's stock quantity.                                                                                                               
   def updateStock(id: Long, qty: Long): Future[Int] = {
     val q = for (i <- It if i.id === id) yield i.stock
     db.run(q.update(qty))

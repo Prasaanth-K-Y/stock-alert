@@ -7,6 +7,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import scala.concurrent.{Future, ExecutionContext}
+import utils.CryptoUtils
 
 @Singleton
 class UserRepo @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
@@ -68,4 +69,15 @@ class UserRepo @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: 
   // Retrieve user's phone number (flattened from Option[Option[String]])
   def getPhone(id: Long): Future[Option[String]] =
     db.run(users.filter(_.id === id).map(_.phone).result.headOption).map(_.flatten)
+
+// Update a user's role
+def updateRole(id: Long, newRole: String): Future[Int] = {
+  db.run(users.filter(_.id === id).map(_.role).update(newRole))
+}
+  // Check Users phone number exists
+  def phoneExists(phone: String): Future[Boolean] = {
+  val encryptedPhone = CryptoUtils.encrypt(phone)
+  db.run(users.filter(_.phone === Option(encryptedPhone)).exists.result)
+}
+
 }

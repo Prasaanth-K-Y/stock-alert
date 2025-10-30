@@ -3,7 +3,7 @@ GET     /                      controllers.HomeController.index
 
 GET     /items                 controllers.StockController.getAllItems()
 GET     /items/:id             controllers.StockController.getItem(id: Long)
-PUT     /items/:id/:stock      controllers.StockController.updateStock(id: Long, stock:Long)
+PUT     /restock/:id/:stock      controllers.StockController.updateStock(id: Long, stock:Long)
 POST    /items                 controllers.StockController.addItems()
 POST    /orders                controllers.StockController.newOrder()
 GET     /assets/*file          controllers.Assets.versioned(path="/public", file: Asset)
@@ -16,11 +16,6 @@ PUT   /user/:id/phone   controllers.UserController.updatePhone(id: Long)
 DELETE  /user/:id          controllers.UserController.deleteUser(id: Long)
 
 
-
-
-
-
-
 GET     /renew           controllers.AuthController.renewAccessToken() 
 GET   /login       controllers.AuthController.loginRedirect()
 POST    /logout                controllers.AuthController.logout()  
@@ -28,5 +23,12 @@ GET     /pay/:amount     controllers.RazorpayTestController.createOrder(amount: 
 GET     /callback    controllers.AuthController.callback(code: String, state: Option[String])
 POST    /auth/signup      controllers.AuthController.signupWithOAuth
 
+
+
+
+
+
+
 GET   /auth/verify   controllers.AuthController.verify2FA
 GET   /auth/setup/:userEmail   controllers.AuthController.setup2FA(userEmail: String)
+PUT   /user/:role/:id      controllers.UserController.updateRole(role : String, id : Long)

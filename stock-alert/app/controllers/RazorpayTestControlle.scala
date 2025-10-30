@@ -1,24 +1,56 @@
 package controllers
 
-import javax.inject._
+
 import play.api.mvc._
-import com.razorpay.RazorpayClient
 import org.json.JSONObject
+import javax.inject._
+import scala.concurrent.{ExecutionContext, Future}
+import com.razorpay.RazorpayClient
+import play.api.libs.json._
+import utils.{JwtActionBuilder, Attrs}
+import play.filters.csrf.{CSRF, CSRFAddToken}
+import io.github.cdimascio.dotenv.Dotenv
 
 @Singleton
-class RazorpayTestController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
+class RazorpayTestController @Inject() (
+  cc: ControllerComponents,
+  jwtAction: JwtActionBuilder,
 
-  // Replace with your actual Test Keys
-  val client = new RazorpayClient("rzp_test_RTeOMdWBZh4V1U", "TKFcAIgU6VG7ULhvR3YoDA7d")
+)(implicit ec: ExecutionContext)
+  extends AbstractController(cc) {
+  
 
-  def createOrder(amount: Int) = Action {
-    val orderRequest = new JSONObject()
-    orderRequest.put("amount", amount * 100) // in paise
-    orderRequest.put("currency", "INR")
-    orderRequest.put("receipt", "order_rcptid_11")
-    orderRequest.put("payment_capture", 1)
+  //For local run
+  // private val dotenv = Dotenv.load() 
 
-    val order = client.orders.create(orderRequest)
-    Ok(order.toString)
+  // Dontenv
+  private val dotenv = Dotenv.configure().directory("/app").load()
+
+  //Client Setup with KeyId , KeySecret
+  private val client = new RazorpayClient(
+    dotenv.get("RAZORPAY_KEY_ID"),
+    dotenv.get("RAZORPAY_KEY_SECRET")
+  )
+
+  def createOrder(amount: Int): Action[AnyContent] = jwtAction.async { request =>
+    val user = request.attrs(Attrs.User)
+    //Authoization for Customer
+    if (user.role != "Customer") {
+      Future.successful(Forbidden("Only Customers can create Razorpay orders"))
+    } else {
+      Future {
+        val orderRequest = new JSONObject()
+        orderRequest.put("amount", amount * 100) 
+        orderRequest.put("currency", "INR")
+        orderRequest.put("receipt", s"order_rcptid_${user.id.getOrElse(0L)}")
+        orderRequest.put("payment_capture", 1)
+
+        val order = client.orders.create(orderRequest)
+        Ok(Json.parse(order.toString))
+      }.recover {
+        case ex: Exception =>
+          InternalServerError(Json.obj("error" -> ex.getMessage))
+      }
+    }
   }
 }
